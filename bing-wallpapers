@@ -1,0 +1,41 @@
+#!/bin/bash
+
+WALLPAPERS_PATH="/home/usoban/Pictures/wallpapers"
+WORK_FILE="$WALLPAPERS_PATH/.bingwp"
+JOBS_FILE="$WALLPAPERS_PATH/.jobs"
+
+cd $WALLPAPERS_PATH
+
+JOB_EXECUTED_TODAY=$(cat "$JOBS_FILE" | grep $(date +"%F") -c)
+if [ "$JOB_EXECUTED_TODAY" -gt 0 ]; then
+    echo "Job already executed today. ($JOB_EXECUTED_TODAY)"
+    exit 1
+fi
+
+wget -O "$WORK_FILE" "http://www.bing.com"
+
+urls=$(cat $WORK_FILE | grep -o g_img={.*} | grep -o "url:'[^']*'" | cut -d : -f 2)
+filePattern=$(date +"%Y-%M-%d")
+idx=0
+for url in $urls; do
+	wallpaperPath=${url:2:(-1)}
+	wallpaperURL="http://www.bing.com/$wallpaperPath"
+	fileName="$filePattern-$idx.jpg"
+	wget -O "$fileName" "$wallpaperURL"
+	let idx++
+done
+
+setWallpaper="$WALLPAPERS_PATH/$filePattern-1.jpg"
+if [ -e "$setWallpaper" ]; then
+    # http://stackoverflow.com/questions/10374520/gsettings-with-cron
+    # Weird, but necessary thing to run with cron.
+    sessionfile=`find "${HOME}/.dbus/session-bus/" -type f`
+    export `grep "DBUS_SESSION_BUS_ADDRESS" "${sessionfile}" | sed '/^#/d'`
+	
+    gsettings set org.gnome.desktop.background picture-uri file://$setWallpaper
+fi
+
+rm $WORK_FILE
+echo $(date +"%F") >> $JOBS_FILE
+
+exit 0
