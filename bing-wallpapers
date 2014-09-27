@@ -29,10 +29,10 @@ setWallpaper="$WALLPAPERS_PATH/$filePattern-1.jpg"
 if [ -e "$setWallpaper" ]; then
     # http://stackoverflow.com/questions/10374520/gsettings-with-cron
     # Weird, but necessary thing to run with cron.
-    sessionfile=`find "${HOME}/.dbus/session-bus/" -type f`
-    export `grep "DBUS_SESSION_BUS_ADDRESS" "${sessionfile}" | sed '/^#/d'`
-	
-    gsettings set org.gnome.desktop.background picture-uri file://$setWallpaper
+    #sessionfile=`find "${HOME}/.dbus/session-bus/" -type f`
+    #export `grep "DBUS_SESSION_BUS_ADDRESS" "${sessionfile}" | sed '/^#/d'`
+    #gsettings set org.gnome.desktop.background picture-uri file://$setWallpaper
+    feh --bg-scale ${setWallpaper}
 fi
 
 rm $WORK_FILE
